@@ -3,7 +3,7 @@
 Plugin Name: Custom .htaccess rules manager
 Description: Manage custom .htaccess rules (top and bottom blocks) with shell-mode syntax highlighting and auto-expanding editor.
 Version: 1.0.0
-Plugin URI: https://github.com/pduchnovsky/pd-custom-htaccess-rules
+Plugin URI: https://github.com/pduchnovsky/custom-htaccess-rules
 Author: pd
 Author URI: https://duchnovsky.com
 License: GPL-2.0+
