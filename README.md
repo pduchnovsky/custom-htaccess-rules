@@ -92,7 +92,7 @@ On the `Settings > Custom .htaccess` page, there's an "Uninstall Options" sectio
 
 ## Screenshots
 
-![image](img/screenshot.png)
+![screenshot](assets/screenshot.png)
 
 ## Changelog
 

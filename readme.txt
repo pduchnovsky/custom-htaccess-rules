@@ -109,6 +109,10 @@ The plugin keeps the last 10 backups of your .htaccess file. Older backups are a
 = What happens to my backups when I uninstall the plugin? =
 On the Settings > Custom .htaccess page, there's an "Uninstall Options" section where you can choose whether to "Delete all plugin data (including .htaccess backups) upon uninstallation" or "Keep .htaccess backups on the server upon uninstallation." This gives you control over your data.
 
+== Screenshots ==
+
+1. screenshot.png
+
 == Changelog ==
 
 = 1.0.0 =
