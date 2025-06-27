@@ -347,7 +347,7 @@ function pd_cht_get_current_custom_htaccess_rules($position = 'top') {
         return '';
     }
 
-    $block = $position === 'top' ? 'customrulestop' : 'customrulesbottom';
+    $block = $position === 'top' ? 'CustomRulesTop' : 'CustomRulesBottom';
 
     if (preg_match('/# BEGIN ' . preg_quote($block, '/') . '(.*?)# END ' . preg_quote($block, '/') . '/s', $content, $matches)) {
         return trim($matches[1]);
@@ -365,8 +365,8 @@ function pd_cht_get_current_custom_htaccess_rules($position = 'top') {
  * @return bool|string True on success, error message string on failure.
  */
 function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
-    $top_block = "# BEGIN customrulestop\n" . trim($top_rules) . "\n# END customrulestop";
-    $bottom_block = "# BEGIN customrulesbottom\n" . trim($bottom_rules) . "\n# END customrulesbottom";
+    $top_block = "# BEGIN CustomRulesTop\n" . trim($top_rules) . "\n# END CustomRulesTop";
+    $bottom_block = "# BEGIN CustomRulesBottom\n" . trim($bottom_rules) . "\n# END CustomRulesBottom";
 
     global $wp_filesystem;
     if (empty($wp_filesystem)) {
@@ -386,8 +386,8 @@ function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
     }
 
     // Remove existing custom blocks.
-    $content_without_top = preg_replace('/# BEGIN customrulestop(.*?)# END customrulestop/s', '', $current_content);
-    $content_without_both = preg_replace('/# BEGIN customrulesbottom(.*?)# END customrulesbottom/s', '', $content_without_top);
+    $content_without_top = preg_replace('/# BEGIN CustomRulesTop(.*?)# END CustomRulesTop/s', '', $current_content);
+    $content_without_both = preg_replace('/# BEGIN CustomRulesBottom(.*?)# END CustomRulesBottom/s', '', $content_without_top);
 
     // Clean up extra newlines.
     $content_without_both = preg_replace("/\n{2,}/", "\n\n", $content_without_both);
