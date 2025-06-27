@@ -18,14 +18,14 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants.
-if (!defined('PD_CHT_PREFIX')) {
-    define('PD_CHT_PREFIX', 'PD_CHT_');
+if (!defined('pd_cht_prefix')) {
+    define('pd_cht_prefix', 'pd_cht_');
 }
-if (!defined(PD_CHT_PREFIX . 'TARGET_FILE')) {
-    define(PD_CHT_PREFIX . 'TARGET_FILE', ABSPATH . '.htaccess');
+if (!defined(pd_cht_prefix . 'target_file')) {
+    define(pd_cht_prefix . 'target_file', ABSPATH . '.htaccess');
 }
-if (!defined(PD_CHT_PREFIX . 'BACKUP_DIR')) {
-    define(PD_CHT_PREFIX . 'BACKUP_DIR', WP_CONTENT_DIR . '/uploads/htaccess-backups/');
+if (!defined(pd_cht_prefix . 'backup_dir')) {
+    define(pd_cht_prefix . 'backup_dir', WP_CONTENT_DIR . '/uploads/htaccess-backups/');
 }
 
 /**
@@ -36,19 +36,19 @@ add_action('plugins_loaded', function () {
 });
 
 // Register plugin lifecycle hooks.
-register_activation_hook(__FILE__, PD_CHT_PREFIX . 'activate');
-register_deactivation_hook(__FILE__, PD_CHT_PREFIX . 'deactivate');
-register_uninstall_hook(__FILE__, PD_CHT_PREFIX . 'uninstall');
+register_activation_hook(__FILE__, 'pd_cht_activate');
+register_deactivation_hook(__FILE__, 'pd_cht_deactivate');
+register_uninstall_hook(__FILE__, 'pd_cht_uninstall');
 
 /**
  * Plugin activation tasks.
  * Ensures the backup directory exists and sets a default cleanup option.
  */
 function pd_cht_activate() {
-    if (!file_exists(PD_CHT_BACKUP_DIR)) {
-        wp_mkdir_p(PD_CHT_BACKUP_DIR);
+    if (!file_exists(pd_cht_backup_dir)) {
+        wp_mkdir_p(pd_cht_backup_dir);
     }
-    add_option(PD_CHT_PREFIX . 'cleanup_on_uninstall', 'delete');
+    add_option(pd_cht_prefix . 'cleanup_on_uninstall', 'delete');
 }
 
 /**
@@ -63,13 +63,13 @@ function pd_cht_deactivate() {
  * Handles deletion of backup directory based on user option and deletes plugin option.
  */
 function pd_cht_uninstall() {
-    $cleanup_option = get_option(PD_CHT_PREFIX . 'cleanup_on_uninstall', 'delete');
+    $cleanup_option = get_option(pd_cht_prefix . 'cleanup_on_uninstall', 'delete');
 
     if ($cleanup_option === 'delete') {
         pd_cht_delete_backup_directory();
     }
 
-    delete_option(PD_CHT_PREFIX . 'cleanup_on_uninstall');
+    delete_option(pd_cht_prefix . 'cleanup_on_uninstall');
 }
 
 /**
@@ -79,7 +79,7 @@ function pd_cht_uninstall() {
  * @return bool True on success, false on failure.
  */
 function pd_cht_delete_backup_directory() {
-    if (!file_exists(PD_CHT_BACKUP_DIR)) {
+    if (!file_exists(pd_cht_backup_dir)) {
         return true;
     }
 
@@ -93,7 +93,7 @@ function pd_cht_delete_backup_directory() {
     }
 
     if ($wp_filesystem) {
-        return $wp_filesystem->rmdir(PD_CHT_BACKUP_DIR, true);
+        return $wp_filesystem->rmdir(pd_cht_backup_dir, true);
     }
 
     return false;
@@ -102,14 +102,14 @@ function pd_cht_delete_backup_directory() {
 /**
  * Adds the options page to the WordPress admin menu.
  */
-add_action('admin_menu', PD_CHT_PREFIX . 'add_options_page');
+add_action('admin_menu', 'pd_cht_add_options_page');
 function pd_cht_add_options_page() {
     add_options_page(
         'Custom .htaccess', // Page title - intentionally not translated.
         'Custom .htaccess', // Menu title - intentionally not translated.
         'manage_options',
         'custom-htaccess',
-        PD_CHT_PREFIX . 'settings_page'
+        'pd_cht_settings_page'
     );
 }
 
@@ -118,7 +118,7 @@ function pd_cht_add_options_page() {
  *
  * @param string $hook The current admin page hook.
  */
-add_action('admin_enqueue_scripts', PD_CHT_PREFIX . 'enqueue_admin_scripts');
+add_action('admin_enqueue_scripts', 'pd_cht_enqueue_admin_scripts');
 function pd_cht_enqueue_admin_scripts($hook) {
     if ($hook !== 'settings_page_custom-htaccess') {
         return;
@@ -142,8 +142,8 @@ function pd_cht_settings_page() {
     $message = '';
     $error = '';
 
-    if (!file_exists(PD_CHT_BACKUP_DIR)) {
-        if (!wp_mkdir_p(PD_CHT_BACKUP_DIR)) {
+    if (!file_exists(pd_cht_backup_dir)) {
+        if (!wp_mkdir_p(pd_cht_backup_dir)) {
             $error = esc_html__('Failed to create backup directory. Please check permissions.', 'custom-htaccess-rules');
         }
     }
@@ -178,7 +178,7 @@ function pd_cht_settings_page() {
     // Handle backup restoration.
     if (isset($_POST['pd_cht_restore_backup_nonce']) && wp_verify_nonce(wp_unslash($_POST['pd_cht_restore_backup_nonce']), 'pd_cht_restore_backup')) {
         $backup_file = isset($_POST['pd_cht_backup_file']) ? sanitize_text_field(wp_unslash($_POST['pd_cht_backup_file'])) : '';
-        $backup_path = PD_CHT_BACKUP_DIR . $backup_file;
+        $backup_path = pd_cht_backup_dir . $backup_file;
 
         if (!empty($backup_file) && file_exists($backup_path)) {
             global $wp_filesystem;
@@ -188,13 +188,13 @@ function pd_cht_settings_page() {
                 WP_Filesystem($creds);
             }
 
-            if ($wp_filesystem && $wp_filesystem->copy($backup_path, PD_CHT_TARGET_FILE, true, FS_CHMOD_FILE)) {
+            if ($wp_filesystem && $wp_filesystem->copy($backup_path, pd_cht_target_file, true, FS_CHMOD_FILE)) {
                 // translators: %s: Name of the restored backup file.
                 $message = sprintf(esc_html__('Successfully restored backup from %s.', 'custom-htaccess-rules'), esc_html($backup_file));
             } else {
                 // translators: %s: Name of the backup file that failed to restore.
                 $error = sprintf(esc_html__('Failed to restore backup from %s. Check file permissions.', 'custom-htaccess-rules'), esc_html($backup_file));
-                if ($wp_filesystem && !$wp_filesystem->is_writable(PD_CHT_TARGET_FILE)) {
+                if ($wp_filesystem && !$wp_filesystem->is_writable(pd_cht_target_file)) {
                     $error .= ' ' . esc_html__('The .htaccess file is not writable.', 'custom-htaccess-rules');
                 }
             }
@@ -207,7 +207,7 @@ function pd_cht_settings_page() {
     if (isset($_POST['pd_cht_save_cleanup_option_nonce']) && wp_verify_nonce(wp_unslash($_POST['pd_cht_save_cleanup_option_nonce']), 'pd_cht_save_cleanup_option')) {
         $new_cleanup_option = isset($_POST['pd_cht_cleanup_on_uninstall']) ? sanitize_text_field(wp_unslash($_POST['pd_cht_cleanup_on_uninstall'])) : '';
         if (in_array($new_cleanup_option, ['delete', 'keep'])) {
-            update_option(PD_CHT_PREFIX . 'cleanup_on_uninstall', $new_cleanup_option);
+            update_option(pd_cht_prefix . 'cleanup_on_uninstall', $new_cleanup_option);
             $message = esc_html__('Cleanup option updated successfully.', 'custom-htaccess-rules');
         } else {
             $error = esc_html__('Invalid cleanup option selected.', 'custom-htaccess-rules');
@@ -216,7 +216,7 @@ function pd_cht_settings_page() {
 
     $current_top = pd_cht_get_current_custom_htaccess_rules('top');
     $current_bottom = pd_cht_get_current_custom_htaccess_rules('bottom');
-    $cleanup_option = get_option(PD_CHT_PREFIX . 'cleanup_on_uninstall', 'delete');
+    $cleanup_option = get_option(pd_cht_prefix . 'cleanup_on_uninstall', 'delete');
     ?>
     <div class="wrap">
         <h1><?php esc_html_e('Custom .htaccess Rules', 'custom-htaccess-rules'); ?></h1>
@@ -327,7 +327,7 @@ function pd_cht_settings_page() {
  * @return string The rules within the specified block, or an empty string if not found or on error.
  */
 function pd_cht_get_current_custom_htaccess_rules($position = 'top') {
-    if (!file_exists(PD_CHT_TARGET_FILE)) {
+    if (!file_exists(pd_cht_target_file)) {
         return '';
     }
 
@@ -339,15 +339,15 @@ function pd_cht_get_current_custom_htaccess_rules($position = 'top') {
     }
 
     $content = '';
-    if ($wp_filesystem && $wp_filesystem->exists(PD_CHT_TARGET_FILE)) {
-        $content = $wp_filesystem->get_contents(PD_CHT_TARGET_FILE);
+    if ($wp_filesystem && $wp_filesystem->exists(pd_cht_target_file)) {
+        $content = $wp_filesystem->get_contents(pd_cht_target_file);
     }
 
     if ($content === false || empty($content)) {
         return '';
     }
 
-    $block = $position === 'top' ? 'CustomRulesTop' : 'CustomRulesBottom';
+    $block = $position === 'top' ? 'customrulestop' : 'customrulesbottom';
 
     if (preg_match('/# BEGIN ' . preg_quote($block, '/') . '(.*?)# END ' . preg_quote($block, '/') . '/s', $content, $matches)) {
         return trim($matches[1]);
@@ -365,8 +365,8 @@ function pd_cht_get_current_custom_htaccess_rules($position = 'top') {
  * @return bool|string True on success, error message string on failure.
  */
 function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
-    $top_block = "# BEGIN CustomRulesTop\n" . trim($top_rules) . "\n# END CustomRulesTop";
-    $bottom_block = "# BEGIN CustomRulesBottom\n" . trim($bottom_rules) . "\n# END CustomRulesBottom";
+    $top_block = "# BEGIN customrulestop\n" . trim($top_rules) . "\n# END customrulestop";
+    $bottom_block = "# BEGIN customrulesbottom\n" . trim($bottom_rules) . "\n# END customrulesbottom";
 
     global $wp_filesystem;
     if (empty($wp_filesystem)) {
@@ -378,16 +378,16 @@ function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
     }
 
     $current_content = '';
-    if ($wp_filesystem->exists(PD_CHT_TARGET_FILE)) {
-        $current_content = $wp_filesystem->get_contents(PD_CHT_TARGET_FILE);
+    if ($wp_filesystem->exists(pd_cht_target_file)) {
+        $current_content = $wp_filesystem->get_contents(pd_cht_target_file);
         if ($current_content === false) {
             return esc_html__('Failed to read current .htaccess file content.', 'custom-htaccess-rules');
         }
     }
 
     // Remove existing custom blocks.
-    $content_without_top = preg_replace('/# BEGIN CustomRulesTop(.*?)# END CustomRulesTop/s', '', $current_content);
-    $content_without_both = preg_replace('/# BEGIN CustomRulesBottom(.*?)# END CustomRulesBottom/s', '', $content_without_top);
+    $content_without_top = preg_replace('/# BEGIN customrulestop(.*?)# END customrulestop/s', '', $current_content);
+    $content_without_both = preg_replace('/# BEGIN customrulesbottom(.*?)# END customrulesbottom/s', '', $content_without_top);
 
     // Clean up extra newlines.
     $content_without_both = preg_replace("/\n{2,}/", "\n\n", $content_without_both);
@@ -408,7 +408,7 @@ function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
     $new_content = implode("\n\n", $new_content_parts) . "\n";
 
     // Atomic write implementation.
-    $temp_file = PD_CHT_TARGET_FILE . '.temp_' . uniqid();
+    $temp_file = pd_cht_target_file . '.temp_' . uniqid();
 
     if (!$wp_filesystem->put_contents($temp_file, $new_content, FS_CHMOD_FILE)) {
         if ($wp_filesystem->exists($temp_file)) {
@@ -417,7 +417,7 @@ function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
         return esc_html__('Failed to write to temporary file. Check permissions for the .htaccess directory.', 'custom-htaccess-rules');
     }
 
-    if (!$wp_filesystem->move($temp_file, PD_CHT_TARGET_FILE, true)) {
+    if (!$wp_filesystem->move($temp_file, pd_cht_target_file, true)) {
         if ($wp_filesystem->exists($temp_file)) {
             $wp_filesystem->delete($temp_file);
         }
@@ -433,7 +433,7 @@ function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
  * @return bool True on success, false on failure.
  */
 function pd_cht_create_backup() {
-    if (!file_exists(PD_CHT_TARGET_FILE)) {
+    if (!file_exists(pd_cht_target_file)) {
         return true;
     }
 
@@ -446,17 +446,17 @@ function pd_cht_create_backup() {
         }
     }
 
-    if (!$wp_filesystem->exists(PD_CHT_BACKUP_DIR)) {
-        if (!$wp_filesystem->mkdir(PD_CHT_BACKUP_DIR, FS_CHMOD_DIR)) {
+    if (!$wp_filesystem->exists(pd_cht_backup_dir)) {
+        if (!$wp_filesystem->mkdir(pd_cht_backup_dir, FS_CHMOD_DIR)) {
             return false;
         }
     }
 
     $timestamp = current_time('Ymd-His');
     $backup_filename = '.htaccess-backup-' . $timestamp . '.bak';
-    $backup_path = PD_CHT_BACKUP_DIR . $backup_filename;
+    $backup_path = pd_cht_backup_dir . $backup_filename;
 
-    if ($wp_filesystem->copy(PD_CHT_TARGET_FILE, $backup_path, true, FS_CHMOD_FILE)) {
+    if ($wp_filesystem->copy(pd_cht_target_file, $backup_path, true, FS_CHMOD_FILE)) {
         return true;
     } else {
         return false;
@@ -479,8 +479,8 @@ function pd_cht_get_backup_files() {
         }
     }
 
-    if ($wp_filesystem->exists(PD_CHT_BACKUP_DIR) && $wp_filesystem->is_dir(PD_CHT_BACKUP_DIR)) {
-        $files = $wp_filesystem->dirlist(PD_CHT_BACKUP_DIR);
+    if ($wp_filesystem->exists(pd_cht_backup_dir) && $wp_filesystem->is_dir(pd_cht_backup_dir)) {
+        $files = $wp_filesystem->dirlist(pd_cht_backup_dir);
         if (is_array($files)) {
             foreach ($files as $filename => $file_info) {
                 if (str_starts_with($filename, '.htaccess-backup-') && str_ends_with($filename, '.bak')) {
