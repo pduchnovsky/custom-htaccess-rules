@@ -1,0 +1,151 @@
+# Copyright (C) 2025 pd
+# This file is distributed under the same license as the Custom .htaccess rules manager plugin.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Custom .htaccess rules manager 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/pduchnovsky/pd-custom-htaccess-rules/issues\n"
+"Last-Translator: pd <peter@duchnovsky.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-06-26 15:00+0000\n"
+"X-Generator: Poedit 3.4.1\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-WPHeader: custom-htaccess-rules.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_ngettext_noop:1,2;_n_noop:1,2;_x:1,2c;_nx:4c,1,2;_nx_noop:3c,1,2;_ex:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#: custom-htaccess-rules.php:127
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: custom-htaccess-rules.php:137, custom-htaccess-rules.php:400, custom-htaccess-rules.php:457
+msgid "Failed to create backup directory. Please check permissions."
+msgstr ""
+
+#: custom-htaccess-rules.php:147
+msgid "Failed to create a backup of the .htaccess file. Please check directory permissions for wp-content/uploads/htaccess-backups/. Rules were not saved."
+msgstr ""
+
+#: custom-htaccess-rules.php:152
+msgid "Custom rules saved successfully."
+msgstr ""
+
+#: custom-htaccess-rules.php:156
+#, php-format
+msgid "Failed to update the file: %s. Check file permissions or server logs."
+msgstr ""
+
+#: custom-htaccess-rules.php:165
+#, php-format
+msgid "Successfully restored backup from %s."
+msgstr ""
+
+#: custom-htaccess-rules.php:168
+#, php-format
+msgid "Failed to restore backup from %s. Check file permissions."
+msgstr ""
+
+#: custom-htaccess-rules.php:169
+msgid "The .htaccess file is not writable."
+msgstr ""
+
+#: custom-htaccess-rules.php:172
+msgid "Invalid backup file selected."
+msgstr ""
+
+#: custom-htaccess-rules.php:180
+msgid "Cleanup option updated successfully."
+msgstr ""
+
+#: custom-htaccess-rules.php:182
+msgid "Invalid cleanup option selected."
+msgstr ""
+
+#: custom-htaccess-rules.php:197
+msgid "Top of File"
+msgstr ""
+
+#: custom-htaccess-rules.php:198
+msgid "Rules entered here will be placed at the very beginning of your .htaccess file. Be cautious, incorrect rules can break your site."
+msgstr ""
+
+#: custom-htaccess-rules.php:202
+msgid "Bottom of File"
+msgstr ""
+
+#: custom-htaccess-rules.php:203
+msgid "Rules entered here will be placed at the very end of your .htaccess file. Be cautious, incorrect rules can break your site."
+msgstr ""
+
+#: custom-htaccess-rules.php:207
+msgid "Save Rules"
+msgstr ""
+
+#: custom-htaccess-rules.php:214
+msgid ".htaccess Backups"
+msgstr ""
+
+#: custom-htaccess-rules.php:215
+msgid "A backup is automatically created when you save rules. You can restore from a previous backup here."
+msgstr ""
+
+#: custom-htaccess-rules.php:221
+msgid "Select a backup to restore:"
+msgstr ""
+
+#: custom-htaccess-rules.php:230
+msgid "Restore Selected Backup"
+msgstr ""
+
+#: custom-htaccess-rules.php:230
+msgid "Are you sure you want to restore this backup? This will overwrite your current .htaccess file. Proceed with caution."
+msgstr ""
+
+#: custom-htaccess-rules.php:235
+msgid "No backups found. Backups are automatically created when you save rules."
+msgstr ""
+
+#: custom-htaccess-rules.php:241
+msgid "Uninstall Options"
+msgstr ""
+
+#: custom-htaccess-rules.php:242
+msgid "Choose how you want the plugin to behave when it is uninstalled (deleted from WordPress)."
+msgstr ""
+
+#: custom-htaccess-rules.php:245
+msgid "Delete all plugin data (including .htaccess backups) upon uninstallation."
+msgstr ""
+
+#: custom-htaccess-rules.php:247
+msgid "Keep .htaccess backups on the server upon uninstallation."
+msgstr ""
+
+#: custom-htaccess-rules.php:250
+msgid "Save Uninstall Option"
+msgstr ""
+
+#: custom-htaccess-rules.php:289
+msgid "wp.codeEditor is not available. CodeMirror editor might not be initialized."
+msgstr ""
+
+#: custom-htaccess-rules.php:327
+msgid "Failed to read current .htaccess file content."
+msgstr ""
+
+#: custom-htaccess-rules.php:344
+msgid "Failed to initialize WordPress Filesystem. Please check your file permissions or FTP/SSH credentials."
+msgstr ""
+
+#: custom-htaccess-rules.php:352
+msgid "Failed to write to temporary file. Check permissions for the .htaccess directory."
+msgstr ""
+
+#: custom-htaccess-rules.php:365
+msgid "Failed to rename temporary file to .htaccess. Check permissions or if the file is in use."
+msgstr ""

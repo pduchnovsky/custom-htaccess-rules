@@ -1,0 +1,152 @@
+# Slovak translation for Custom .htaccess rules manager
+# Copyright (C) 2025 pd
+# This file is distributed under the same license as the Custom .htaccess rules manager plugin.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Custom .htaccess rules manager 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/pduchnovsky/pd-custom-htaccess-rules/issues\n"
+"Last-Translator: pd <peter@duchnovsky.com>\n"
+"Language-Team: Slovak <https://translate.wordpress.org/locale/sk/default/wp-plugins/custom-htaccess-rules>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"X-Generator: Poedit 3.4.1\n"
+"X-Poedit-Basepath: ..\n"
+"X-Poedit-WPHeader: custom-htaccess-rules.php\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_ngettext_noop:1,2;_n_noop:1,2;_x:1,2c;_nx:4c,1,2;_nx_noop:3c,1,2;_ex:1,2c;esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c;\n"
+"X-Poedit-SearchPath-0: .\n"
+"Language: sk_SK\n"
+
+#: custom-htaccess-rules.php:127
+msgid "You do not have sufficient permissions to access this page."
+msgstr "Nemáte dostatočné povolenia na prístup k tejto stránke."
+
+#: custom-htaccess-rules.php:137, custom-htaccess-rules.php:400, custom-htaccess-rules.php:457
+msgid "Failed to create backup directory. Please check permissions."
+msgstr "Nepodarilo sa vytvoriť záložný adresár. Skontrolujte prosím povolenia."
+
+#: custom-htaccess-rules.php:147
+msgid "Failed to create a backup of the .htaccess file. Please check directory permissions for wp-content/uploads/htaccess-backups/. Rules were not saved."
+msgstr "Nepodarilo sa vytvoriť zálohu súboru .htaccess. Skontrolujte prosím povolenia adresára pre wp-content/uploads/htaccess-backups/. Pravidlá neboli uložené."
+
+#: custom-htaccess-rules.php:152
+msgid "Custom rules saved successfully."
+msgstr "Vlastné pravidlá úspešne uložené."
+
+#: custom-htaccess-rules.php:156
+#, php-format
+msgid "Failed to update the file: %s. Check file permissions or server logs."
+msgstr "Nepodarilo sa aktualizovať súbor: %s. Skontrolujte povolenia súboru alebo protokoly servera."
+
+#: custom-htaccess-rules.php:165
+#, php-format
+msgid "Successfully restored backup from %s."
+msgstr "Záloha z %s bola úspešne obnovená."
+
+#: custom-htaccess-rules.php:168
+#, php-format
+msgid "Failed to restore backup from %s. Check file permissions."
+msgstr "Nepodarilo sa obnoviť zálohu z %s. Skontrolujte povolenia súboru."
+
+#: custom-htaccess-rules.php:169
+msgid "The .htaccess file is not writable."
+msgstr ".htaccess súbor nie je zapisovateľný."
+
+#: custom-htaccess-rules.php:172
+msgid "Invalid backup file selected."
+msgstr "Vybraný neplatný záložný súbor."
+
+#: custom-htaccess-rules.php:180
+msgid "Cleanup option updated successfully."
+msgstr "Možnosť čistenia úspešne aktualizovaná."
+
+#: custom-htaccess-rules.php:182
+msgid "Invalid cleanup option selected."
+msgstr "Vybraná neplatná možnosť čistenia."
+
+#: custom-htaccess-rules.php:197
+msgid "Top of File"
+msgstr "Začiatok súboru"
+
+#: custom-htaccess-rules.php:198
+msgid "Rules entered here will be placed at the very beginning of your .htaccess file. Be cautious, incorrect rules can break your site."
+msgstr "Pravidlá zadané tu budú umiestnené na samý začiatok vášho .htaccess súboru. Buďte opatrní, nesprávne pravidlá môžu poškodiť vašu stránku."
+
+#: custom-htaccess-rules.php:202
+msgid "Bottom of File"
+msgstr "Koniec súboru"
+
+#: custom-htaccess-rules.php:203
+msgid "Rules entered here will be placed at the very end of your .htaccess file. Be cautious, incorrect rules can break your site."
+msgstr "Pravidlá zadané tu budú umiestnené na samý koniec vášho .htaccess súboru. Buďte opatrní, nesprávne pravidlá môžu poškodiť vašu stránku."
+
+#: custom-htaccess-rules.php:207
+msgid "Save Rules"
+msgstr "Uložiť pravidlá"
+
+#: custom-htaccess-rules.php:214
+msgid ".htaccess Backups"
+msgstr ".htaccess zálohy"
+
+#: custom-htaccess-rules.php:215
+msgid "A backup is automatically created when you save rules. You can restore from a previous backup here."
+msgstr "Záloha sa automaticky vytvorí pri uložení pravidiel. Tu môžete obnoviť z predchádzajúcej zálohy."
+
+#: custom-htaccess-rules.php:221
+msgid "Select a backup to restore:"
+msgstr "Vyberte zálohu na obnovenie:"
+
+#: custom-htaccess-rules.php:230
+msgid "Restore Selected Backup"
+msgstr "Obnoviť vybranú zálohu"
+
+#: custom-htaccess-rules.php:230
+msgid "Are you sure you want to restore this backup? This will overwrite your current .htaccess file. Proceed with caution."
+msgstr "Ste si istí, že chcete obnoviť túto zálohu? Týmto prepíšete váš aktuálny súbor .htaccess. Pokračujte opatrne."
+
+#: custom-htaccess-rules.php:235
+msgid "No backups found. Backups are automatically created when you save rules."
+msgstr "Nenašli sa žiadne zálohy. Zálohy sa automaticky vytvoria, keď uložíte pravidlá."
+
+#: custom-htaccess-rules.php:241
+msgid "Uninstall Options"
+msgstr "Možnosti odinštalovania"
+
+#: custom-htaccess-rules.php:242
+msgid "Choose how you want the plugin to behave when it is uninstalled (deleted from WordPress)."
+msgstr "Vyberte, ako sa má plugin správať, keď bude odinštalovaný (odstránený z WordPressu)."
+
+#: custom-htaccess-rules.php:245
+msgid "Delete all plugin data (including .htaccess backups) upon uninstallation."
+msgstr "Odstrániť všetky údaje pluginu (vrátane záloh .htaccess) pri odinštalovaní."
+
+#: custom-htaccess-rules.php:247
+msgid "Keep .htaccess backups on the server upon uninstallation."
+msgstr "Ponechať zálohy .htaccess na serveri pri odinštalovaní."
+
+#: custom-htaccess-rules.php:250
+msgid "Save Uninstall Option"
+msgstr "Uložiť možnosť odinštalovania"
+
+#: custom-htaccess-rules.php:289
+msgid "wp.codeEditor is not available. CodeMirror editor might not be initialized."
+msgstr "wp.codeEditor nie je k dispozícii. Editor CodeMirror nemusí byť inicializovaný."
+
+#: custom-htaccess-rules.php:327
+msgid "Failed to read current .htaccess file content."
+msgstr "Nepodarilo sa prečítať aktuálny obsah súboru .htaccess."
+
+#: custom-htaccess-rules.php:344
+msgid "Failed to initialize WordPress Filesystem. Please check your file permissions or FTP/SSH credentials."
+msgstr "Nepodarilo sa inicializovať systém súborov WordPress. Skontrolujte si prosím povolenia súborov alebo poverenia FTP/SSH."
+
+#: custom-htaccess-rules.php:352
+msgid "Failed to write to temporary file. Check permissions for the .htaccess directory."
+msgstr "Nepodarilo sa zapísať do dočasného súboru. Skontrolujte povolenia adresára .htaccess."
+
+#: custom-htaccess-rules.php:365
+msgid "Failed to rename temporary file to .htaccess. Check permissions or if the file is in use."
+msgstr "Nepodarilo sa premenovať dočasný súbor na .htaccess. Skontrolujte povolenia alebo či je súbor používaný."
