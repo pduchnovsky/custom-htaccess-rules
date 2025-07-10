@@ -28,13 +28,6 @@ if (!defined(pd_cht_prefix . 'backup_dir')) {
     define(pd_cht_prefix . 'backup_dir', WP_CONTENT_DIR . '/uploads/htaccess-backups/');
 }
 
-/**
- * Loads the plugin's text domain for internationalization.
- */
-add_action('plugins_loaded', function () {
-    load_plugin_textdomain('custom-htaccess-rules', false, basename(dirname(__FILE__)) . '/languages');
-});
-
 // Register plugin lifecycle hooks.
 register_activation_hook(__FILE__, 'pd_cht_activate');
 register_deactivation_hook(__FILE__, 'pd_cht_deactivate');
