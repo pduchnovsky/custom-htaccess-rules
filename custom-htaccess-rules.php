@@ -108,7 +108,7 @@ function pd_cht_add_options_page() {
         'Custom .htaccess', // Page title - intentionally not translated.
         'Custom .htaccess', // Menu title - intentionally not translated.
         'manage_options',
-        'custom-htaccess',
+        'pd_cht_custom_htaccess', // Changed this slug to be unique
         'pd_cht_settings_page'
     );
 }
@@ -120,7 +120,8 @@ function pd_cht_add_options_page() {
  */
 add_action('admin_enqueue_scripts', 'pd_cht_enqueue_admin_scripts');
 function pd_cht_enqueue_admin_scripts($hook) {
-    if ($hook !== 'settings_page_custom-htaccess') {
+    // The hook name now reflects the updated menu slug
+    if ($hook !== 'settings_page_pd_cht_custom_htaccess') {
         return;
     }
 
