@@ -22,9 +22,13 @@ if (!defined('pd_cht_prefix')) {
     define('pd_cht_prefix', 'pd_cht_');
 }
 if (!defined(pd_cht_prefix . 'target_file')) {
-    define(pd_cht_prefix . 'target_file', get_home_path() . '.htaccess');
+    // The .htaccess file is located in the WordPress root directory.
+    // ABSPATH is a reliable constant for paths relative to the WordPress root,
+    // ensuring it's available early during plugin loading.
+    define(pd_cht_prefix . 'target_file', ABSPATH . '.htaccess');
 }
 if (!defined(pd_cht_prefix . 'backup_dir')) {
+    // Use wp_upload_dir() to correctly determine the uploads directory path for backups.
     $upload_dir = wp_upload_dir();
     define(pd_cht_prefix . 'backup_dir', $upload_dir['basedir'] . '/htaccess-backups/');
 }
