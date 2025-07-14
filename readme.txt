@@ -1,5 +1,5 @@
 === Custom .htaccess rules manager ===
-Contributors: pd
+Contributors: pdux
 Donate link:
 Tags: htaccess, custom rules, editor, backup, security
 Requires at least: 5.0

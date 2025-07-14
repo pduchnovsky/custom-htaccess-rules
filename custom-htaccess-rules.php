@@ -22,10 +22,11 @@ if (!defined('pd_cht_prefix')) {
     define('pd_cht_prefix', 'pd_cht_');
 }
 if (!defined(pd_cht_prefix . 'target_file')) {
-    define(pd_cht_prefix . 'target_file', ABSPATH . '.htaccess');
+    define(pd_cht_prefix . 'target_file', get_home_path() . '.htaccess');
 }
 if (!defined(pd_cht_prefix . 'backup_dir')) {
-    define(pd_cht_prefix . 'backup_dir', WP_CONTENT_DIR . '/uploads/htaccess-backups/');
+    $upload_dir = wp_upload_dir();
+    define(pd_cht_prefix . 'backup_dir', $upload_dir['basedir'] . '/htaccess-backups/');
 }
 
 // Register plugin lifecycle hooks.
@@ -46,6 +47,7 @@ function pd_cht_activate() {
 
 /**
  * Plugin deactivation tasks.
+ * No specific actions needed on deactivation for this plugin.
  */
 function pd_cht_deactivate() {
     // No specific actions needed on deactivation for this plugin.
@@ -101,32 +103,65 @@ function pd_cht_add_options_page() {
         'Custom .htaccess', // Page title - intentionally not translated.
         'Custom .htaccess', // Menu title - intentionally not translated.
         'manage_options',
-        'pd_cht_custom_htaccess', // Changed this slug to be unique
+        'pd_cht_custom_htaccess',
         'pd_cht_settings_page'
     );
 }
 
 /**
  * Enqueues scripts and styles for the settings page.
+ * Utilizes wp_enqueue_code_editor for shell-mode syntax highlighting and
+ * wp_add_inline_script for custom editor initialization.
  *
  * @param string $hook The current admin page hook.
  */
 add_action('admin_enqueue_scripts', 'pd_cht_enqueue_admin_scripts');
 function pd_cht_enqueue_admin_scripts($hook) {
-    // The hook name now reflects the updated menu slug
+    // Enqueue scripts and styles only on the plugin's settings page.
     if ($hook !== 'settings_page_pd_cht_custom_htaccess') {
         return;
     }
 
+    // Enqueue WordPress code editor with shell syntax highlighting.
     wp_enqueue_code_editor(['type' => 'shell']);
-    wp_enqueue_script('wp-theme-plugin-editor');
-    wp_enqueue_style('wp-codemirror');
 
+    // Add inline style for CodeMirror editor height.
     wp_add_inline_style('wp-codemirror', '.CodeMirror { height: auto !important; max-height: none !important; }');
+
+    // Add inline script to initialize CodeMirror editors for the textareas.
+    wp_add_inline_script(
+        'code-editor', // Attach to the 'code-editor' script handle.
+        'document.addEventListener("DOMContentLoaded", function () {
+            ["custom_htaccess_top", "custom_htaccess_bottom"].forEach(id => {
+                const textarea = document.getElementById(id);
+                if (textarea) {
+                    if (window.wp && window.wp.codeEditor && window.wp.codeEditor.initialize) {
+                        const editor = wp.codeEditor.initialize(textarea, {
+                            codemirror: {
+                                mode: "shell",
+                                lineNumbers: true,
+                                indentUnit: 4,
+                                tabSize: 4,
+                                lineWrapping: true
+                            }
+                        });
+
+                        if (editor && editor.codemirror) {
+                            editor.codemirror.setOption("viewportMargin", Infinity);
+                            editor.codemirror.refresh();
+                        }
+                    } else {
+                        console.warn("wp.codeEditor is not available. CodeMirror editor might not be initialized.");
+                    }
+                }
+            });
+        });'
+    );
 }
 
 /**
  * Renders the custom .htaccess settings page.
+ * Handles form submissions for saving rules, restoring backups, and managing uninstall options.
  */
 function pd_cht_settings_page() {
     if (!current_user_can('manage_options')) {
@@ -136,6 +171,7 @@ function pd_cht_settings_page() {
     $message = '';
     $error = '';
 
+    // Ensure the backup directory exists.
     if (!file_exists(pd_cht_backup_dir)) {
         if (!wp_mkdir_p(pd_cht_backup_dir)) {
             $error = esc_html__('Failed to create backup directory. Please check permissions.', 'custom-htaccess-rules');
@@ -146,8 +182,8 @@ function pd_cht_settings_page() {
     if (isset($_POST['custom_htaccess_top']) && isset($_POST['custom_htaccess_bottom'])) {
         check_admin_referer('save_custom_htaccess');
 
-        // For .htaccess rules (code-like input), wp_unslash and trim are used.
-        // Stricter sanitization (e.g., sanitize_textarea_field) would strip valid .htaccess characters.
+        // Sanitize .htaccess rules cautiously; wp_unslash and trim are used as stricter sanitization
+        // like sanitize_textarea_field would strip valid .htaccess characters.
         $top_rules = trim(wp_unslash($_POST['custom_htaccess_top']));
         $bottom_rules = trim(wp_unslash($_POST['custom_htaccess_bottom']));
 
@@ -170,7 +206,7 @@ function pd_cht_settings_page() {
     }
 
     // Handle backup restoration.
-    if (isset($_POST['pd_cht_restore_backup_nonce']) && wp_verify_nonce(wp_unslash($_POST['pd_cht_restore_backup_nonce']), 'pd_cht_restore_backup')) {
+    if (isset($_POST['pd_cht_restore_backup_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['pd_cht_restore_backup_nonce'])), 'pd_cht_restore_backup')) {
         $backup_file = isset($_POST['pd_cht_backup_file']) ? sanitize_text_field(wp_unslash($_POST['pd_cht_backup_file'])) : '';
         $backup_path = pd_cht_backup_dir . $backup_file;
 
@@ -198,7 +234,7 @@ function pd_cht_settings_page() {
     }
 
     // Handle cleanup option save.
-    if (isset($_POST['pd_cht_save_cleanup_option_nonce']) && wp_verify_nonce(wp_unslash($_POST['pd_cht_save_cleanup_option_nonce']), 'pd_cht_save_cleanup_option')) {
+    if (isset($_POST['pd_cht_save_cleanup_option_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['pd_cht_save_cleanup_option_nonce'])), 'pd_cht_save_cleanup_option')) {
         $new_cleanup_option = isset($_POST['pd_cht_cleanup_on_uninstall']) ? sanitize_text_field(wp_unslash($_POST['pd_cht_cleanup_on_uninstall'])) : '';
         if (in_array($new_cleanup_option, ['delete', 'keep'])) {
             update_option(pd_cht_prefix . 'cleanup_on_uninstall', $new_cleanup_option);
@@ -282,34 +318,6 @@ function pd_cht_settings_page() {
         </form>
 
     </div>
-
-    <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        ["custom_htaccess_top", "custom_htaccess_bottom"].forEach(id => {
-            const textarea = document.getElementById(id);
-            if (textarea) {
-                if (window.wp && window.wp.codeEditor && window.wp.codeEditor.initialize) {
-                    const editor = wp.codeEditor.initialize(textarea, {
-                        codemirror: {
-                            mode: 'shell',
-                            lineNumbers: true,
-                            indentUnit: 4,
-                            tabSize: 4,
-                            lineWrapping: true
-                        }
-                    });
-
-                    if (editor && editor.codemirror) {
-                        editor.codemirror.setOption('viewportMargin', Infinity);
-                        editor.codemirror.refresh();
-                    }
-                } else {
-                    console.warn('wp.codeEditor is not available. CodeMirror editor might not be initialized.');
-                }
-            }
-        });
-    });
-    </script>
     <?php
 }
 
@@ -401,7 +409,7 @@ function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
 
     $new_content = implode("\n\n", $new_content_parts) . "\n";
 
-    // Atomic write implementation.
+    // Atomic write implementation: Write to temp file, then rename.
     $temp_file = pd_cht_target_file . '.temp_' . uniqid();
 
     if (!$wp_filesystem->put_contents($temp_file, $new_content, FS_CHMOD_FILE)) {
