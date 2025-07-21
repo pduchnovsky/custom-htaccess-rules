@@ -13,25 +13,34 @@ Manage custom .htaccess rules (top and bottom blocks) with shell-mode syntax hig
 
 == Description ==
 
-The "Custom .htaccess rules manager" plugin provides a secure and intuitive interface within your WordPress admin dashboard to manage custom rules for your .htaccess file. This powerful tool allows you to insert specific rules at both the very beginning and very end of your .htaccess file, ensuring they are applied correctly without interfering with WordPress's own core rules.
+The "Custom .htaccess rules manager" plugin provides a secure and intuitive interface within your WordPress admin dashboard to manage custom rules for your .htaccess file. This powerful tool allows you to insert specific rules at both the very beginning and very end of your .htaccess file, ensuring they are applied correctly without interfering with WordPress’s own core rules.
 
-Key Features:
+== Key Features ==
 
-Top and Bottom Blocks: Dedicated sections to add rules that appear before and after WordPress's standard .htaccess content.
+= Top and Bottom Blocks =
+Dedicated sections to add rules that appear before and after WordPress’s standard .htaccess content.
 
-Shell-Mode Syntax Highlighting: Makes writing and reviewing .htaccess rules easier with clear visual cues.
+= Shell-Mode Syntax Highlighting =
+Makes writing and reviewing .htaccess rules easier with clear visual cues.
 
-Auto-Expanding Editor: The editor automatically adjusts its height to fit your content, providing a comfortable editing experience.
+= Auto-Expanding Editor =
+The editor automatically adjusts its height to fit your content, providing a comfortable editing experience.
 
-Automatic Backups: Every time you save new rules, a backup of your existing .htaccess file is automatically created, providing a safety net.
+= Automatic Backups =
+Every time you save new rules, a backup of your existing .htaccess file is automatically created, providing a safety net.
 
-Backup Restoration: Easily restore your .htaccess file from a list of the last 10 backups directly from the plugin settings page.
+= Backup Restoration =
+Easily restore your .htaccess file from a list of the last 10 backups directly from the plugin settings page.
 
-Uninstall Options: Choose whether to delete .htaccess backups or keep them on your server when uninstalling the plugin.
+= Uninstall Options =
+Choose whether to delete .htaccess backups or keep them on your server when uninstalling the plugin.
 
-WordPress Filesystem API Integration: All file operations are performed using WordPress's robust WP_Filesystem API, ensuring compatibility and security across various hosting environments.
+= WordPress Filesystem API Integration =
+All file operations are performed using WordPress’s robust WP_Filesystem API, ensuring compatibility and security across various hosting environments.
 
-Important Note: Modifying the .htaccess file incorrectly can lead to your website becoming inaccessible. Always exercise caution and ensure you understand the rules you are adding. The backup feature is designed to help, but careful testing is always recommended.
+== Important Note ==
+
+Modifying the .htaccess file incorrectly can lead to your website becoming inaccessible. Always exercise caution and ensure you understand the rules you are adding. The backup feature is designed to help, but careful testing is always recommended.
 
 == Installation ==
 
