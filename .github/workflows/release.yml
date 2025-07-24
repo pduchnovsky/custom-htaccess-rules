@@ -1,0 +1,139 @@
+name: WordPress Plugin Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      force_deploy:
+        description: 'Force deployment even if no changes are detected (overwrites existing tag if version matches).'
+        required: false
+        type: boolean
+        default: false
+
+env:
+  PLUGIN_SLUG: custom-htaccess-rules
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Git Repository
+        uses: actions/checkout@v4
+
+      - name: Set up SVN environment
+        run: |
+          sudo apt-get update && sudo apt-get install -y subversion rsync
+
+      - name: Create Temporary SVN Directory
+        id: create_svn_dir
+        run: |
+          TEMP_SVN_DIR=$(mktemp -d -t svn-XXXXX)
+          echo "Created temporary SVN directory: $TEMP_SVN_DIR"
+          echo "SVN_CHECKOUT_ROOT=$TEMP_SVN_DIR" >> "$GITHUB_ENV"
+
+      - name: Get Plugin Version
+        id: get_version
+        run: |
+          NEW_VERSION=$(grep -m 1 "Stable tag:" "${{ github.workspace }}/readme.txt" | awk -F':' '{print $2}' | tr -d '[:space:]')
+
+          if [ -z "$NEW_VERSION" ]; then
+              echo "Error: Could not find 'Stable tag:' in readme.txt." >&2
+              exit 1
+          fi
+          echo "Using version from readme.txt: $NEW_VERSION"
+          echo "NEW_VERSION=$NEW_VERSION" >> "$GITHUB_ENV"
+
+      - name: SVN Checkout
+        run: |
+          echo "📦 Attempting SVN checkout to: ${{ env.SVN_CHECKOUT_ROOT }}"
+          svn co "https://plugins.svn.wordpress.org/${{ env.PLUGIN_SLUG }}/" "${{ env.SVN_CHECKOUT_ROOT }}" \
+              --username "${{ secrets.SVN_USER }}" --password "${{ secrets.SVN_PW }}" || {
+              echo "❌ Error: Failed to check out SVN repository." >&2
+              exit 1
+          }
+          echo "✅ SVN checkout completed successfully."
+        env:
+          SVN_USER: ${{ secrets.SVN_USER }}
+          SVN_PW: ${{ secrets.SVN_PW }}
+
+      - name: Copy Files to SVN Trunk
+        run: |
+          echo "2/5: Copying files from Git repo to SVN trunk and assets directory..."
+
+          rsync -av --delete "$GITHUB_WORKSPACE/assets/" "${{ env.SVN_CHECKOUT_ROOT }}/assets/" || { echo "Error: Failed to synchronize assets." >&2; exit 1; }
+
+          mkdir -p "${{ env.SVN_CHECKOUT_ROOT }}/trunk"
+          rsync -av --delete \
+            --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude 'assets/' \
+            --exclude 'README.md' \
+            "$GITHUB_WORKSPACE/" "${{ env.SVN_CHECKOUT_ROOT }}/trunk/" || { echo "Error: Failed to synchronize trunk files." >&2; exit 1; }
+
+      - name: Check for SVN Changes
+        id: check_diff
+        run: |
+          echo "Checking for actual changes in the SVN checkout..."
+          pushd "${{ env.SVN_CHECKOUT_ROOT }}" > /dev/null
+
+          svn add --force . > /dev/null 2>&1
+          svn status | grep '^!' | awk '{print $2}' | xargs -I {} svn rm {} > /dev/null 2>&1 || true
+
+          CHANGES=$(svn status --xml | grep -E 'item="(modified|added|deleted)"' | wc -l)
+
+          popd > /dev/null
+
+          if [ "$CHANGES" -gt 0 ]; then
+              echo "Detected $CHANGES changes in SVN checkout. Trunk will be updated."
+              echo "TRUNK_CHANGED=true" >> "$GITHUB_ENV"
+          else
+              echo "No changes detected in SVN checkout."
+              echo "TRUNK_CHANGED=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: SVN Commit to Trunk
+        if: env.TRUNK_CHANGED == 'true' || github.event.inputs.force_deploy
+        run: |
+          echo "3/5: Committing changes to trunk..."
+          pushd "${{ env.SVN_CHECKOUT_ROOT }}" > /dev/null
+
+          svn commit -m "Update trunk and assets for version ${{ env.NEW_VERSION }}" \
+              --username "${{ secrets.SVN_USER }}" --password "${{ secrets.SVN_PW }}" || { popd > /dev/null; exit 1; }
+          popd > /dev/null
+          echo "✅ Trunk updated and committed successfully."
+        env:
+          SVN_USER: ${{ secrets.SVN_USER }}
+          SVN_PW: ${{ secrets.SVN_PW }}
+
+      - name: Tag the Release
+        if: env.TRUNK_CHANGED == 'true' || github.event.inputs.force_deploy
+        run: |
+          echo "4/5: Creating tag for version ${{ env.NEW_VERSION }}..."
+          pushd "${{ env.SVN_CHECKOUT_ROOT }}" > /dev/null
+
+          if svn info "https://plugins.svn.wordpress.org/${{ env.PLUGIN_SLUG }}/tags/${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
+              echo "⚠️ Tag tags/${{ env.NEW_VERSION }} already exists. Overwriting it..."
+              svn delete "https://plugins.svn.wordpress.org/${{ env.PLUGIN_SLUG }}/tags/${{ env.NEW_VERSION }}" \
+                  -m "Delete existing tag ${{ env.NEW_VERSION }} to recreate it" \
+                  --username "${{ secrets.SVN_USER }}" --password "${{ secrets.SVN_PW }}" || { echo "Error: Failed to delete existing tag." >&2; popd > /dev/null; exit 1; }
+              svn update --username "${{ secrets.SVN_USER }}" --password "${{ secrets.SVN_PW }}" || { echo "Error: SVN update after delete failed." >&2; popd > /dev/null; exit 1; }
+          fi
+
+          svn copy trunk "tags/${{ env.NEW_VERSION }}" || { popd > /dev/null; exit 1; }
+          svn commit -m "Tagging version ${{ env.NEW_VERSION }}" \
+              --username "${{ secrets.SVN_USER }}" --password "${{ secrets.SVN_PW }}" || { popd > /dev/null; exit 1; }
+          popd > /dev/null
+          echo "--- ✅ Release ${{ env.NEW_VERSION }} completed successfully! ---"
+          echo "Check your plugin page on WordPress.org in 10-30 minutes to verify updates."
+        env:
+          SVN_USER: ${{ secrets.SVN_USER }}
+          SVN_PW: ${{ secrets.SVN_PW }}
+
+      - name: Clean up temporary SVN directory
+        if: always()
+        run: |
+          echo "Cleaning up temporary SVN directory: ${{ env.SVN_CHECKOUT_ROOT }}"
+          rm -rf "${{ env.SVN_CHECKOUT_ROOT }}"
