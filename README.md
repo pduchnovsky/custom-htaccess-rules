@@ -1,8 +1,8 @@
 # Custom .htaccess Rules Manager
 
 [![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/custom-htaccess-rules.svg)](https://wordpress.org/plugins/custom-htaccess-rules/)
-[![WordPress Tested Up To](https://img.shields.io/wordpress/plugin/tested/custom-htaccess-rules.svg)](https://wordpress.org/plugins/custom-htaccess-rules/)
-[![Requires PHP](https://img.shields.io/badge/Requires%20PHP-7.4%2B-blue.svg)](https://www.php.net/)
+[![WordPress Tested Up To](https://img.shields.io/badge/Tested%20up%20to-7.0-blue.svg)](https://wordpress.org/plugins/custom-htaccess-rules/)
+[![Requires PHP](https://img.shields.io/badge/Requires%20PHP-8.4%2B-blue.svg)](https://www.php.net/)
 [![License](https://img.shields.io/badge/license-GPL--2.0%2B-blue.svg)](http://www.gnu.org/licenses/gpl-2.0.txt)
 
 Manage custom `.htaccess` rules (top and bottom blocks) with shell-mode syntax highlighting and an auto-expanding editor.
@@ -26,6 +26,7 @@ The "Custom .htaccess rules manager" plugin provides a secure and intuitive inte
 * **Uninstall Options:** Choose whether to delete `.htaccess` backups or keep them on your server when uninstalling the plugin.
 
 * **WordPress Filesystem API Integration:** All file operations are performed using WordPress's robust WP_Filesystem API, ensuring compatibility and security across various hosting environments.
+* **Modern Compatibility:** Compatible with WordPress 7.0 and newer, and PHP 8.4+.
 
 **Important Note:** Modifying the `.htaccess` file incorrectly can lead to your website becoming inaccessible. Always exercise caution and ensure you understand the rules you are adding. The backup feature is designed to help, but careful testing is always recommended.
 
@@ -95,6 +96,10 @@ On the `Settings > Custom .htaccess` page, there's an "Uninstall Options" sectio
 ![screenshot](assets/screenshot-1.png)
 
 ## Changelog
+
+### 1.0.1
+
+* Minor changes
 
 ### 1.0.0
 

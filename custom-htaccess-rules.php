@@ -2,7 +2,7 @@
 /*
 Plugin Name: Custom .htaccess rules manager
 Description: Manage custom .htaccess rules (top and bottom blocks) with shell-mode syntax highlighting and auto-expanding editor.
-Version: 1.0.0
+Version: 1.0.1
 Plugin URI: https://github.com/pduchnovsky/custom-htaccess-rules
 Author: pd
 Author URI: https://duchnovsky.com
@@ -37,6 +37,14 @@ if (!defined(pd_cht_prefix . 'backup_dir')) {
 register_activation_hook(__FILE__, 'pd_cht_activate');
 register_deactivation_hook(__FILE__, 'pd_cht_deactivate');
 register_uninstall_hook(__FILE__, 'pd_cht_uninstall');
+add_action('init', 'pd_cht_load_textdomain');
+
+/**
+ * Load plugin translations.
+ */
+function pd_cht_load_textdomain() {
+    load_plugin_textdomain('custom-htaccess-rules', false, dirname(plugin_basename(__FILE__)) . '/languages/');
+}
 
 /**
  * Plugin activation tasks.
@@ -127,7 +135,13 @@ function pd_cht_enqueue_admin_scripts($hook) {
     }
 
     // Enqueue WordPress code editor with shell syntax highlighting.
-    wp_enqueue_code_editor(['type' => 'shell']);
+    $editor_settings = wp_enqueue_code_editor(['type' => 'text/x-sh']);
+    if (! $editor_settings) {
+        return;
+    }
+
+    wp_enqueue_script('code-editor');
+    wp_enqueue_style('wp-codemirror');
 
     // Add inline style for CodeMirror editor height.
     wp_add_inline_style('wp-codemirror', '.CodeMirror { height: auto !important; max-height: none !important; }');
@@ -212,6 +226,7 @@ function pd_cht_settings_page() {
     // Handle backup restoration.
     if (isset($_POST['pd_cht_restore_backup_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['pd_cht_restore_backup_nonce'])), 'pd_cht_restore_backup')) {
         $backup_file = isset($_POST['pd_cht_backup_file']) ? sanitize_text_field(wp_unslash($_POST['pd_cht_backup_file'])) : '';
+        $backup_file = basename($backup_file);
         $backup_path = pd_cht_backup_dir . $backup_file;
 
         if (!empty($backup_file) && file_exists($backup_path)) {
@@ -371,8 +386,18 @@ function pd_cht_get_current_custom_htaccess_rules($position = 'top') {
  * @return bool|string True on success, error message string on failure.
  */
 function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
-    $top_block = "# BEGIN CustomRulesTop\n" . trim($top_rules) . "\n# END CustomRulesTop";
-    $bottom_block = "# BEGIN CustomRulesBottom\n" . trim($bottom_rules) . "\n# END CustomRulesBottom";
+    $top_rules = trim($top_rules);
+    $bottom_rules = trim($bottom_rules);
+    $top_block = '';
+    $bottom_block = '';
+
+    if ($top_rules !== '') {
+        $top_block = "# BEGIN CustomRulesTop\n" . $top_rules . "\n# END CustomRulesTop";
+    }
+
+    if ($bottom_rules !== '') {
+        $bottom_block = "# BEGIN CustomRulesBottom\n" . $bottom_rules . "\n# END CustomRulesBottom";
+    }
 
     global $wp_filesystem;
     if (empty($wp_filesystem)) {
@@ -401,14 +426,18 @@ function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
 
     // Assemble the new content.
     $new_content_parts = [];
-    if (!empty($top_block)) {
+    if ($top_block !== '') {
         $new_content_parts[] = $top_block;
     }
-    if (!empty($content_without_both)) {
+    if ($content_without_both !== '') {
         $new_content_parts[] = $content_without_both;
     }
-    if (!empty($bottom_block)) {
+    if ($bottom_block !== '') {
         $new_content_parts[] = $bottom_block;
+    }
+
+    if (empty($new_content_parts)) {
+        return true;
     }
 
     $new_content = implode("\n\n", $new_content_parts) . "\n";
@@ -489,7 +518,9 @@ function pd_cht_get_backup_files() {
         $files = $wp_filesystem->dirlist(pd_cht_backup_dir);
         if (is_array($files)) {
             foreach ($files as $filename => $file_info) {
-                if (str_starts_with($filename, '.htaccess-backup-') && str_ends_with($filename, '.bak')) {
+                $starts_with_prefix = strpos($filename, '.htaccess-backup-') === 0;
+                $ends_with_suffix = substr($filename, -4) === '.bak';
+                if ($starts_with_prefix && $ends_with_suffix) {
                     $backups[] = $filename;
                 }
             }

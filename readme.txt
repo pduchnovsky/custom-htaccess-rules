@@ -3,9 +3,9 @@ Contributors: pdux
 Donate link:
 Tags: htaccess, custom rules, editor, backup, security
 Requires at least: 5.0
-Tested up to: 6.8
-Stable tag: 1.0.0
-Requires PHP: 7.4
+Tested up to: 7.0
+Stable tag: 1.0.1
+Requires PHP: 8.4
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
 
@@ -123,6 +123,10 @@ On the Settings > Custom .htaccess page, there's an "Uninstall Options" section 
 1. screenshot-1.png
 
 == Changelog ==
+
+= 1.0.1 =
+
+Minor changes
 
 = 1.0.0 =
 

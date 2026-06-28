@@ -4,7 +4,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Custom .htaccess rules manager 1.0.0\n"
+"Project-Id-Version: Custom .htaccess rules manager 1.0.1\n"
 "Report-Msgid-Bugs-To: https://github.com/pduchnovsky/pd-custom-htaccess-rules/issues\n"
 "Last-Translator: pd <peter@duchnovsky.com>\n"
 "Language-Team: Slovak <https://translate.wordpress.org/locale/sk/default/wp-plugins/custom-htaccess-rules>\n"
