@@ -13,39 +13,41 @@ The "Custom .htaccess rules manager" plugin provides a secure and intuitive inte
 
 ### Key Features:
 
-* **Top and Bottom Blocks:** Dedicated sections to add rules that appear before and after WordPress's standard `.htaccess` content.
+- **Top and Bottom Blocks:** Dedicated sections to add rules that appear before and after WordPress's standard `.htaccess` content.
 
-* **Shell-Mode Syntax Highlighting:** Makes writing and reviewing `.htaccess` rules easier with clear visual cues.
+- **Shell-Mode Syntax Highlighting:** Makes writing and reviewing `.htaccess` rules easier with clear visual cues.
 
-* **Auto-Expanding Editor:** The editor automatically adjusts its height to fit your content, providing a comfortable editing experience.
+- **Auto-Expanding Editor:** The editor automatically adjusts its height to fit your content, providing a comfortable editing experience.
 
-* **Automatic Backups:** Every time you save new rules, a backup of your existing `.htaccess` file is automatically created, providing a safety net.
+- **Automatic Backups:** Every time you save new rules, a backup of your existing `.htaccess` file is automatically created, providing a safety net.
 
-* **Backup Restoration:** Easily restore your `.htaccess` file from a list of the last 10 backups directly from the plugin settings page.
+- **Backup Restoration:** Easily restore your `.htaccess` file from a list of the last 10 backups directly from the plugin settings page.
 
-* **Uninstall Options:** Choose whether to delete `.htaccess` backups or keep them on your server when uninstalling the plugin.
+- **Uninstall Options:** Choose whether to delete `.htaccess` backups or keep them on your server when uninstalling the plugin.
 
-* **WordPress Filesystem API Integration:** All file operations are performed using WordPress's robust WP_Filesystem API, ensuring compatibility and security across various hosting environments.
-* **Modern Compatibility:** Compatible with WordPress 7.0 and newer, and PHP 8.4+.
+- **8G Firewall Integration:** Optionally enable a dedicated 8G firewall section with its own rules field, placed after the Top of File block.
+
+- **WordPress Filesystem API Integration:** All file operations are performed using WordPress's robust WP_Filesystem API, ensuring compatibility and security across various hosting environments.
+- **Modern Compatibility:** Compatible with WordPress 7.0 and newer, and PHP 8.4+.
 
 **Important Note:** Modifying the `.htaccess` file incorrectly can lead to your website becoming inaccessible. Always exercise caution and ensure you understand the rules you are adding. The backup feature is designed to help, but careful testing is always recommended.
 
 ## Installation
 
 1.  **Upload:**
-    * Download the plugin ZIP file from the [WordPress.org plugin directory](https://wordpress.org/plugins/custom-htaccess-rules/).
-    * Go to your WordPress admin dashboard, navigate to `Plugins > Add New`.
-    * Click on the "Upload Plugin" button at the top.
-    * Choose the downloaded ZIP file and click "Install Now".
+    - Download the plugin ZIP file from the [WordPress.org plugin directory](https://wordpress.org/plugins/custom-htaccess-rules/).
+    - Go to your WordPress admin dashboard, navigate to `Plugins > Add New`.
+    - Click on the "Upload Plugin" button at the top.
+    - Choose the downloaded ZIP file and click "Install Now".
 
 2.  **Activate:**
-    * Once installed, click "Activate Plugin".
+    - Once installed, click "Activate Plugin".
 
 3.  **Configure:**
-    * Go to `Settings > Custom .htaccess` in your WordPress admin menu.
-    * Add your desired rules in the "Top of File" and "Bottom of File" text areas.
-    * Click "Save Rules".
-    * You can also manage backups and uninstall options from this page.
+    - Go to `Settings > Custom .htaccess` in your WordPress admin menu.
+    - Add your desired rules in the "Top of File" and "Bottom of File" text areas.
+    - Click "Save Rules".
+    - You can also manage backups and uninstall options from this page.
 
 ## Frequently Asked Questions
 
@@ -61,13 +63,13 @@ WordPress automatically manages certain parts of your `.htaccess` file. Placing 
 
 You can add various Apache directives, such as:
 
-* Redirections (`Redirect`, `RewriteRule`)
-* Blocking IP addresses or user agents
-* Setting custom error pages
-* Modifying caching headers
-* Disabling directory browsing
-* Enforcing HTTPS
-* And many more!
+- Redirections (`Redirect`, `RewriteRule`)
+- Blocking IP addresses or user agents
+- Setting custom error pages
+- Modifying caching headers
+- Disabling directory browsing
+- Enforcing HTTPS
+- And many more!
 
 **Always ensure the rules you add are valid Apache directives.**
 
@@ -99,12 +101,12 @@ On the `Settings > Custom .htaccess` page, there's an "Uninstall Options" sectio
 
 ### 1.0.1
 
-* Minor changes
+- Minor changes
 
 ### 1.0.0
 
-* Initial release of the Custom .htaccess rules manager plugin.
+- Initial release of the Custom .htaccess rules manager plugin.
 
-* Features include: Top and Bottom rule blocks, shell-mode syntax highlighting, auto-expanding editor, automatic .htaccess backups, backup restoration, and uninstall options.
+- Features include: Top and Bottom rule blocks, shell-mode syntax highlighting, auto-expanding editor, automatic .htaccess backups, backup restoration, and uninstall options.
 
-* Full integration with WordPress Filesystem API for secure file operations.
+- Full integration with WordPress Filesystem API for secure file operations.

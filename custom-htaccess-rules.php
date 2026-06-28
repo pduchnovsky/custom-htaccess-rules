@@ -2,7 +2,7 @@
 /*
 Plugin Name: Custom .htaccess rules manager
 Description: Manage custom .htaccess rules (top and bottom blocks) with shell-mode syntax highlighting and auto-expanding editor.
-Version: 1.0.1
+Version: 1.1.0
 Plugin URI: https://github.com/pduchnovsky/custom-htaccess-rules
 Author: pd
 Author URI: https://duchnovsky.com
@@ -55,6 +55,7 @@ function pd_cht_activate() {
         wp_mkdir_p(pd_cht_backup_dir);
     }
     add_option(pd_cht_prefix . 'cleanup_on_uninstall', 'delete');
+    add_option(pd_cht_prefix . '8g_enabled', '0');
 }
 
 /**
@@ -77,6 +78,7 @@ function pd_cht_uninstall() {
     }
 
     delete_option(pd_cht_prefix . 'cleanup_on_uninstall');
+    delete_option(pd_cht_prefix . '8g_enabled');
 }
 
 /**
@@ -146,11 +148,13 @@ function pd_cht_enqueue_admin_scripts($hook) {
     // Add inline style for CodeMirror editor height.
     wp_add_inline_style('wp-codemirror', '.CodeMirror { height: auto !important; max-height: none !important; }');
 
-    // Add inline script to initialize CodeMirror editors for the textareas.
+    // Add inline script to initialize CodeMirror editors and handle 8G firewall toggle.
     wp_add_inline_script(
         'code-editor', // Attach to the 'code-editor' script handle.
         'document.addEventListener("DOMContentLoaded", function () {
-            ["custom_htaccess_top", "custom_htaccess_bottom"].forEach(id => {
+            var editors = {};
+
+            ["custom_htaccess_top", "custom_htaccess_8g", "custom_htaccess_bottom"].forEach(id => {
                 const textarea = document.getElementById(id);
                 if (textarea) {
                     if (window.wp && window.wp.codeEditor && window.wp.codeEditor.initialize) {
@@ -168,11 +172,42 @@ function pd_cht_enqueue_admin_scripts($hook) {
                             editor.codemirror.setOption("viewportMargin", Infinity);
                             editor.codemirror.refresh();
                         }
+
+                        editors[id] = editor;
                     } else {
                         console.warn("wp.codeEditor is not available. CodeMirror editor might not be initialized.");
                     }
                 }
             });
+
+            var checkbox8g = document.getElementById("pd_cht_8g_enabled");
+            var section8g  = document.getElementById("pd_cht_8g_firewall_section");
+            if (checkbox8g && section8g) {
+                section8g.style.display = checkbox8g.checked ? "block" : "none";
+                checkbox8g.addEventListener("change", function () {
+                    section8g.style.display = this.checked ? "block" : "none";
+                    if (this.checked && editors["custom_htaccess_8g"] && editors["custom_htaccess_8g"].codemirror) {
+                        editors["custom_htaccess_8g"].codemirror.refresh();
+                    }
+                });
+            }
+
+            var rulesForm = document.getElementById("pd_cht_rules_form");
+            if (rulesForm) {
+                rulesForm.addEventListener("submit", function () {
+                    ["custom_htaccess_top", "custom_htaccess_8g", "custom_htaccess_bottom"].forEach(function (id) {
+                        var textarea = document.getElementById(id);
+                        if (!textarea) return;
+                        var value = (editors[id] && editors[id].codemirror) ? editors[id].codemirror.getValue() : textarea.value;
+                        var hidden = document.getElementById(id + "_b64");
+                        if (hidden) {
+                            try { hidden.value = btoa(unescape(encodeURIComponent(value))); }
+                            catch (e) { hidden.value = btoa(value); }
+                        }
+                        textarea.removeAttribute("name");
+                    });
+                });
+            }
         });'
     );
 }
@@ -197,18 +232,31 @@ function pd_cht_settings_page() {
     }
 
     // Handle form submission for saving rules.
-    if (isset($_POST['custom_htaccess_top']) && isset($_POST['custom_htaccess_bottom'])) {
+    if (isset($_POST['custom_htaccess_top_b64']) && isset($_POST['custom_htaccess_bottom_b64'])) {
         check_admin_referer('save_custom_htaccess');
 
-        // Sanitize .htaccess rules cautiously; wp_unslash and trim are used as stricter sanitization
-        // like sanitize_textarea_field would strip valid .htaccess characters.
-        $top_rules = trim(wp_unslash($_POST['custom_htaccess_top']));
-        $bottom_rules = trim(wp_unslash($_POST['custom_htaccess_bottom']));
+        // Values are base64-encoded by JS before submission to avoid WAF false positives.
+        // wp_unslash() is applied only to the raw POST value (base64 string) to undo WordPress
+        // magic-quotes; it must NOT be applied again after decoding or backslashes in the rules
+        // (regex special chars like \s, \*, \^) will be stripped, breaking Apache syntax.
+        $top_raw    = base64_decode(sanitize_text_field(wp_unslash($_POST['custom_htaccess_top_b64'])), true);
+        $bottom_raw = base64_decode(sanitize_text_field(wp_unslash($_POST['custom_htaccess_bottom_b64'])), true);
+        $top_rules    = $top_raw !== false ? trim($top_raw) : '';
+        $bottom_rules = $bottom_raw !== false ? trim($bottom_raw) : '';
+        $firewall_8g_enabled = isset($_POST['pd_cht_8g_enabled']) && $_POST['pd_cht_8g_enabled'] === '1';
+        if ($firewall_8g_enabled && isset($_POST['custom_htaccess_8g_b64'])) {
+            $g8_raw            = base64_decode(sanitize_text_field(wp_unslash($_POST['custom_htaccess_8g_b64'])), true);
+            $firewall_8g_rules = $g8_raw !== false ? trim($g8_raw) : '';
+        } else {
+            $firewall_8g_rules = '';
+        }
+
+        update_option(pd_cht_prefix . '8g_enabled', $firewall_8g_enabled ? '1' : '0');
 
         if (!pd_cht_create_backup()) {
             $error = esc_html__('Failed to create a backup of the .htaccess file. Please check directory permissions for wp-content/uploads/htaccess-backups/. Rules were not saved.', 'custom-htaccess-rules');
         } else {
-            $result = pd_cht_update_custom_htaccess($top_rules, $bottom_rules);
+            $result = pd_cht_update_custom_htaccess($top_rules, $bottom_rules, $firewall_8g_rules, $firewall_8g_enabled);
 
             if ($result === true) {
                 $message = esc_html__('Custom rules saved successfully.', 'custom-htaccess-rules');
@@ -263,9 +311,11 @@ function pd_cht_settings_page() {
         }
     }
 
-    $current_top = pd_cht_get_current_custom_htaccess_rules('top');
-    $current_bottom = pd_cht_get_current_custom_htaccess_rules('bottom');
-    $cleanup_option = get_option(pd_cht_prefix . 'cleanup_on_uninstall', 'delete');
+    $current_top        = pd_cht_get_current_custom_htaccess_rules('top');
+    $current_8g         = pd_cht_get_current_custom_htaccess_rules('8g');
+    $current_bottom     = pd_cht_get_current_custom_htaccess_rules('bottom');
+    $firewall_8g_enabled = get_option(pd_cht_prefix . '8g_enabled', '0');
+    $cleanup_option     = get_option(pd_cht_prefix . 'cleanup_on_uninstall', 'delete');
     ?>
     <div class="wrap">
         <h1><?php esc_html_e('Custom .htaccess Rules', 'custom-htaccess-rules'); ?></h1>
@@ -276,16 +326,31 @@ function pd_cht_settings_page() {
             <div class="notice notice-error is-dismissible"><p><?php echo esc_html($error); ?></p></div>
         <?php endif; ?>
 
-        <form method="post">
+        <form method="post" id="pd_cht_rules_form">
             <?php wp_nonce_field('save_custom_htaccess'); ?>
 
             <h2><?php esc_html_e('Top of File', 'custom-htaccess-rules'); ?></h2>
             <p class="description"><?php esc_html_e('Rules entered here will be placed at the very beginning of your .htaccess file. Be cautious, incorrect rules can break your site.', 'custom-htaccess-rules'); ?></p>
             <textarea id="custom_htaccess_top" name="custom_htaccess_top" rows="15" style="width:100%;"><?php echo esc_textarea($current_top); ?></textarea>
 
+            <h2><?php esc_html_e('8G Firewall', 'custom-htaccess-rules'); ?></h2>
+            <p class="description"><?php esc_html_e('When enabled, 8G firewall rules are inserted after the Top of File block in your .htaccess file.', 'custom-htaccess-rules'); ?></p>
+            <label>
+                <input type="checkbox" id="pd_cht_8g_enabled" name="pd_cht_8g_enabled" value="1" <?php checked($firewall_8g_enabled, '1'); ?>>
+                <strong><?php esc_html_e('Enable 8G Firewall', 'custom-htaccess-rules'); ?></strong>
+            </label>
+            <div id="pd_cht_8g_firewall_section">
+                <p class="description" style="margin-top:8px;"><?php esc_html_e('Rules entered here will be placed after the Top of File block, wrapped in 8G firewall markers. Be cautious, incorrect rules can break your site.', 'custom-htaccess-rules'); ?></p>
+                <textarea id="custom_htaccess_8g" name="custom_htaccess_8g" rows="15" style="width:100%;"><?php echo esc_textarea($current_8g); ?></textarea>
+            </div>
+
             <h2><?php esc_html_e('Bottom of File', 'custom-htaccess-rules'); ?></h2>
             <p class="description"><?php esc_html_e('Rules entered here will be placed at the very end of your .htaccess file. Be cautious, incorrect rules can break your site.', 'custom-htaccess-rules'); ?></p>
             <textarea id="custom_htaccess_bottom" name="custom_htaccess_bottom" rows="15" style="width:100%;"><?php echo esc_textarea($current_bottom); ?></textarea>
+
+            <input type="hidden" id="custom_htaccess_top_b64" name="custom_htaccess_top_b64" value="">
+            <input type="hidden" id="custom_htaccess_8g_b64" name="custom_htaccess_8g_b64" value="">
+            <input type="hidden" id="custom_htaccess_bottom_b64" name="custom_htaccess_bottom_b64" value="">
 
             <p class="submit">
                 <input type="submit" class="button button-primary" value="<?php esc_attr_e('Save Rules', 'custom-htaccess-rules'); ?>">
@@ -368,6 +433,13 @@ function pd_cht_get_current_custom_htaccess_rules($position = 'top') {
         return '';
     }
 
+    if ($position === '8g') {
+        if (preg_match('/# BEGIN 8G firewall(.*?)# END 8G firewall/s', $content, $matches)) {
+            return trim($matches[1]);
+        }
+        return '';
+    }
+
     $block = $position === 'top' ? 'CustomRulesTop' : 'CustomRulesBottom';
 
     if (preg_match('/# BEGIN ' . preg_quote($block, '/') . '(.*?)# END ' . preg_quote($block, '/') . '/s', $content, $matches)) {
@@ -385,11 +457,13 @@ function pd_cht_get_current_custom_htaccess_rules($position = 'top') {
  * @param string $bottom_rules The rules for the bottom block.
  * @return bool|string True on success, error message string on failure.
  */
-function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
-    $top_rules = trim($top_rules);
-    $bottom_rules = trim($bottom_rules);
-    $top_block = '';
-    $bottom_block = '';
+function pd_cht_update_custom_htaccess($top_rules, $bottom_rules, $firewall_8g_rules = '', $firewall_8g_enabled = false) {
+    $top_rules         = trim($top_rules);
+    $bottom_rules      = trim($bottom_rules);
+    $firewall_8g_rules = trim($firewall_8g_rules);
+    $top_block         = '';
+    $bottom_block      = '';
+    $firewall_8g_block = '';
 
     if ($top_rules !== '') {
         $top_block = "# BEGIN CustomRulesTop\n" . $top_rules . "\n# END CustomRulesTop";
@@ -397,6 +471,10 @@ function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
 
     if ($bottom_rules !== '') {
         $bottom_block = "# BEGIN CustomRulesBottom\n" . $bottom_rules . "\n# END CustomRulesBottom";
+    }
+
+    if ($firewall_8g_enabled && $firewall_8g_rules !== '') {
+        $firewall_8g_block = "# BEGIN 8G firewall\n" . $firewall_8g_rules . "\n# END 8G firewall";
     }
 
     global $wp_filesystem;
@@ -417,8 +495,9 @@ function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
     }
 
     // Remove existing custom blocks.
-    $content_without_top = preg_replace('/# BEGIN CustomRulesTop(.*?)# END CustomRulesTop/s', '', $current_content);
-    $content_without_both = preg_replace('/# BEGIN CustomRulesBottom(.*?)# END CustomRulesBottom/s', '', $content_without_top);
+    $content_without_top  = preg_replace('/# BEGIN CustomRulesTop(.*?)# END CustomRulesTop/s', '', $current_content);
+    $content_without_8g   = preg_replace('/# BEGIN 8G firewall(.*?)# END 8G firewall/s', '', $content_without_top);
+    $content_without_both = preg_replace('/# BEGIN CustomRulesBottom(.*?)# END CustomRulesBottom/s', '', $content_without_8g);
 
     // Clean up extra newlines.
     $content_without_both = preg_replace("/\n{2,}/", "\n\n", $content_without_both);
@@ -428,6 +507,9 @@ function pd_cht_update_custom_htaccess($top_rules, $bottom_rules) {
     $new_content_parts = [];
     if ($top_block !== '') {
         $new_content_parts[] = $top_block;
+    }
+    if ($firewall_8g_block !== '') {
+        $new_content_parts[] = $firewall_8g_block;
     }
     if ($content_without_both !== '') {
         $new_content_parts[] = $content_without_both;

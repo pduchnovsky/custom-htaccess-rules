@@ -4,7 +4,7 @@ Donate link:
 Tags: htaccess, custom rules, editor, backup, security
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 1.0.1
+Stable tag: 1.1.0
 Requires PHP: 8.4
 License: GPL-2.0+
 License URI: http://www.gnu.org/licenses/gpl-2.0.txt
@@ -34,7 +34,8 @@ Easily restore your .htaccess file from a list of the last 10 backups directly f
 
 = Uninstall Options =
 Choose whether to delete .htaccess backups or keep them on your server when uninstalling the plugin.
-
+= 8G Firewall Integration =
+Optionally enable a dedicated 8G firewall section with its own rules field, placed after the Top of File block.
 = WordPress Filesystem API Integration =
 All file operations are performed using WordPress’s robust WP_Filesystem API, ensuring compatibility and security across various hosting environments.
 
@@ -123,6 +124,10 @@ On the Settings > Custom .htaccess page, there's an "Uninstall Options" section 
 1. screenshot-1.png
 
 == Changelog ==
+
+= 1.1.0 =
+
+New feature: Optional 8G Firewall integration. A new checkbox in the settings page allows enabling a dedicated 8G firewall rules editor. When enabled, rules are stored in the .htaccess file between # BEGIN 8G firewall and # END 8G firewall markers, positioned after the Top of File block.
 
 = 1.0.1 =
 
