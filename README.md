@@ -2,7 +2,7 @@
 
 [![WordPress Plugin Version](https://img.shields.io/wordpress/plugin/v/custom-htaccess-rules.svg)](https://wordpress.org/plugins/custom-htaccess-rules/)
 [![WordPress Tested Up To](https://img.shields.io/badge/Tested%20up%20to-7.0-blue.svg)](https://wordpress.org/plugins/custom-htaccess-rules/)
-[![Requires PHP](https://img.shields.io/badge/Requires%20PHP-8.4%2B-blue.svg)](https://www.php.net/)
+[![Requires PHP](https://img.shields.io/badge/Requires%20PHP-7.4%2B-blue.svg)](https://www.php.net/)
 [![License](https://img.shields.io/badge/license-GPL--2.0%2B-blue.svg)](http://www.gnu.org/licenses/gpl-2.0.txt)
 
 Manage custom `.htaccess` rules (top and bottom blocks) with shell-mode syntax highlighting and an auto-expanding editor.
